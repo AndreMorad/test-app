@@ -1,0 +1,34 @@
+name: Deploy React App to Azure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Log in to Azure Container Registry
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Build and push Docker image
+      env:
+        REGISTRY_NAME: <your-registry-name>.azurecr.io
+        IMAGE_NAME: react-app
+      run: |
+        docker build -t $REGISTRY_NAME/$IMAGE_NAME:${{ github.sha }} .
+        echo ${{ secrets.AZURE_CREDENTIALS }} | docker login $REGISTRY_NAME -u andre_morad --password-stdin
+        docker push $REGISTRY_NAME/$IMAGE_NAME:${{ github.sha }}
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: "andre-morad-portfolio"  # Replace with your App Service name
+        images: "andremorad.azurecr.io/react-app:${{ github.sha }}"
