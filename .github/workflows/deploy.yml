@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+permissions: # Place at the root level of the workflow file
+  id-token: write
+  contents: read
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -13,18 +17,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Log in to Azure using environment variables
-        uses: azure/login@v1
+      - name: Log in to Azure using OIDC
+        uses: azure/login@v1 # Make sure this uses 'v1' or the latest version
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          auth-type: oidc
 
       - name: Log in to Azure Container Registry
         env:
           REGISTRY_NAME: andremorad
         run: |
-          echo ${{ secrets.AZURE_CLIENT_SECRET }} | docker login $REGISTRY_NAME.azurecr.io -u ${{ secrets.AZURE_CLIENT_ID }} --password-stdin
+          az acr login --name $REGISTRY_NAME
 
       - name: Build and push Docker image
         env:
@@ -37,5 +42,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "andre-morad-portfolio" # Your Azure Web App name
+          app-name: "andre-morad-portfolio"
           images: "andremorad.azurecr.io/react-app:${{ github.sha }}"
