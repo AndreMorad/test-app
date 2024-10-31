@@ -19,4 +19,4 @@ az ad sp create-for-rbac --name "github-action-deployment" --role Owner --scopes
 }
 
 
-docker build -t andre.morad.azurecr.io/react-app:test . d
+docker build -t andre.morad.azurecr.io/react-app:test . de
