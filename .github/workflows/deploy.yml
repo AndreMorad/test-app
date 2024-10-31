@@ -20,7 +20,7 @@ jobs:
 
       - name: Build and push Docker image
         env:
-          REGISTRY_NAME: <your-registry-name>.azurecr.io
+          REGISTRY_NAME: andremorad.azurecr.io
           IMAGE_NAME: react-app
         run: |
           docker build -t $REGISTRY_NAME/$IMAGE_NAME:${{ github.sha }} .
