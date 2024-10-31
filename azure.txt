@@ -1,0 +1,1 @@
+az ad sp create-for-rbac --name "github-action-deployment" --role contributor --scopes /subscriptions/21b92029-5bca-465f-8a85-ba9c7de1f488/resourceGroups/Andre_Resource_Group --sdk-auth
