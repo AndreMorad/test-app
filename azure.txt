@@ -1,1 +1,22 @@
-az ad sp create-for-rbac --name "github-action-deployment" --role contributor --scopes /subscriptions/21b92029-5bca-465f-8a85-ba9c7de1f488/resourceGroups/Andre_Resource_Group --sdk-auth
+az ad sp create-for-rbac --name "github-action-deployment" --role Owner --scopes /subscriptions/21b92029-5bca-465f-8a85-ba9c7de1f488/resourceGroups/Andre_Resource_Group --sdk-auth
+
+
+az ad sp create-for-rbac --name "github-action-deployment" --role Owner --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP> --sdk-auth
+
+
+
+{
+  "clientId": "d293b0c5-1ef3-4af0-8760-ece13728752b",
+  "clientSecret": "Sxd8Q~Y5NullmMsBb6LssGIQsBJ71lG8VjTaibdQ",
+  "subscriptionId": "21b92029-5bca-465f-8a85-ba9c7de1f488",
+  "tenantId": "bd1630d9-5492-4794-b4e3-dcde83c40f05",
+  "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+  "resourceManagerEndpointUrl": "https://management.azure.com/",
+  "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+  "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+  "galleryEndpointUrl": "https://gallery.azure.com/",
+  "managementEndpointUrl": "https://management.core.windows.net/"
+}
+
+
+docker build -t andre.morad.azurecr.io/react-app:test .
