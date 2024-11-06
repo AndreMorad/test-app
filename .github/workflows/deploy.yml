@@ -1,34 +1,43 @@
-name: Deploy React App to Azure
+name: Deploy React App to Azure App Service
 
 on:
   push:
     branches:
-      - master
+      - master # Trigger the workflow on push to the main branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # Step 1: Check out the code
+      - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Log in to Azure Container Registry
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      # Step 3: Build and push the Docker image to Docker Hub
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
+
+      # Step 4: Log in to Azure using Service Principal
+      - name: Log in to Azure
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
 
-      - name: Build and push Docker image
-        env:
-          REGISTRY_NAME: andremorad.azurecr.io
-          IMAGE_NAME: react-app
-        run: |
-          docker build -t $REGISTRY_NAME/$IMAGE_NAME:${{ github.sha }} .
-          echo ${{ secrets.AZURE_CREDENTIALS }} | docker login $REGISTRY_NAME -u andremorad --password-stdin
-          docker push $REGISTRY_NAME/$IMAGE_NAME:${{ github.sha }}
-
+      # Step 5: Deploy the Docker image from Docker Hub to Azure App Service
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "andre-morad-portfolio" # Replace with your App Service name
-          images: "andremorad.azurecr.io/react-app:${{ github.sha }}"
+          app-name: ${{ secrets.AZURE_APP_NAME }}
+          images: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
