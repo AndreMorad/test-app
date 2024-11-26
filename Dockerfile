@@ -1,27 +1,21 @@
-# Stage 1: Build the React app
-FROM node:16 AS build
+# Base image
+FROM node:18 AS builder
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
-COPY package*.json ./
-RUN npm install
+# Install dependencies
+COPY package.json yarn.lock ./
+RUN yarn install
 
-# Copy the rest of the application code
+# Copy project files
 COPY . .
 
-# Build the React app for production
-RUN npm run build
+# Build the application
+RUN yarn build
 
-# Stage 2: Serve the React app with a lightweight web server
-FROM nginx:alpine
+# Serve the application
+FROM nginx:stable-alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy the build output to the Nginx HTML directory
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Expose port 80
 EXPOSE 5173
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
